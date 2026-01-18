@@ -1,0 +1,22 @@
+{
+  "name": "SSD Virtual Battery",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rebornix.Ruby",
+        "Shopify.ruby-lsp",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  },
+
+  "forwardPorts": [3000, 5432],
+
+  "postCreateCommand": "bundle install && rails db:create db:migrate",
+
+  "remoteUser": "vscode"
+}
