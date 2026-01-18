@@ -1,0 +1,71 @@
+{{- if .Values.worker.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ssd-virtual-battery.fullname" . }}-worker
+  labels:
+    {{- include "ssd-virtual-battery.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ssd-virtual-battery.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "ssd-virtual-battery.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z {{ include "ssd-virtual-battery.postgresqlHost" . }} 5432; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+      containers:
+        - name: worker
+          image: "{{ .Values.rails.image.repository }}:{{ .Values.rails.image.tag }}"
+          imagePullPolicy: {{ .Values.rails.image.pullPolicy }}
+          command:
+            - bin/rails
+            - solid_queue:start
+          envFrom:
+            - configMapRef:
+                name: {{ include "ssd-virtual-battery.fullname" . }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ssd-virtual-battery.fullname" . }}
+                  key: postgres-password
+            - name: DATABASE_URL
+              value: {{ include "ssd-virtual-battery.databaseUrl" . | quote }}
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ssd-virtual-battery.fullname" . }}
+                  key: rails-secret-key-base
+            - name: IMS_SSD_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ssd-virtual-battery.fullname" . }}
+                  key: ims-ssd-username
+            - name: IMS_SSD_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ssd-virtual-battery.fullname" . }}
+                  key: ims-ssd-password
+            - name: IMS_SSD_POINT_OF_DELIVERY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "ssd-virtual-battery.fullname" . }}
+                  key: ims-ssd-point-of-delivery-id
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+{{- end }}

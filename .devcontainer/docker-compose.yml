@@ -6,7 +6,7 @@ services:
       context: ..
       dockerfile: .devcontainer/Dockerfile
     volumes:
-      - ../..:/workspace:cached
+      - ../:/workspace/ssd-virtual-battery:cached
     command: sleep infinity
     environment:
       DATABASE_HOST: db

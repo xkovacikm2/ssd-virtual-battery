@@ -1,0 +1,9 @@
+production:
+  virtual_battery_collection:
+    class: VirtualBatteryDataCollectionJob
+    schedule: every day at 1am
+
+development:
+  virtual_battery_collection:
+    class: VirtualBatteryDataCollectionJob
+    schedule: every day at 1am

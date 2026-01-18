@@ -2,14 +2,15 @@
   "name": "SSD Virtual Battery",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
-  "workspaceFolder": "/workspace",
+  "workspaceFolder": "/workspace/ssd-virtual-battery",
   
   "customizations": {
     "vscode": {
       "extensions": [
-        "rebornix.Ruby",
         "Shopify.ruby-lsp",
-        "bradlc.vscode-tailwindcss"
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-containers",
+        "cweijan.vscode-database-client2"
       ]
     }
   },

@@ -9,7 +9,6 @@ class VirtualBatteryReading < ApplicationRecord
   # Calculate cumulative sums for the current year
   def self.year_to_date_summary
     readings = current_year.order(:date)
-    
     {
       current_charge: readings.last&.current_charge || 0,
       total_exported_to_battery: readings.sum(:exported_to_battery),
