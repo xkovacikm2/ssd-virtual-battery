@@ -1,0 +1,63 @@
+<div class="dashboard-container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+  <h1 style="text-align: center; margin-bottom: 40px;">Virtual Battery Dashboard</h1>
+  
+  <div class="year-summary" style="margin-bottom: 30px;">
+    <h2 style="margin-bottom: 20px;">Year to Date Summary (<%= Date.current.year %>)</h2>
+    
+    <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+      
+      <!-- Current Charge -->
+      <div class="metric-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Current Charge</div>
+        <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+          <%= number_with_precision(@summary[:current_charge], precision: 2) %>
+        </div>
+        <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+      </div>
+
+      <!-- Exported to Battery -->
+      <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Exported to Virtual Battery</div>
+        <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+          <%= number_with_precision(@summary[:total_exported_to_battery], precision: 2) %>
+        </div>
+        <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+      </div>
+
+      <!-- Imported from Battery -->
+      <div class="metric-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Imported from Virtual Battery</div>
+        <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+          <%= number_with_precision(@summary[:total_imported_from_battery], precision: 2) %>
+        </div>
+        <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+      </div>
+
+      <!-- Imported from Grid -->
+      <div class="metric-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Imported from Public Grid</div>
+        <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+          <%= number_with_precision(@summary[:total_imported_from_grid], precision: 2) %>
+        </div>
+        <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+      </div>
+
+    </div>
+  </div>
+
+  <% if @latest_reading %>
+    <div class="latest-reading" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+      <h3 style="margin-bottom: 10px;">Latest Reading</h3>
+      <p style="color: #6c757d; margin: 0;">
+        Last updated: <%= @latest_reading.date.strftime('%B %d, %Y') %>
+      </p>
+    </div>
+  <% else %>
+    <div class="no-data" style="background: #fff3cd; color: #856404; padding: 20px; border-radius: 8px; border: 1px solid #ffeaa7;">
+      <p style="margin: 0;">
+        <strong>No data available yet.</strong> Data will be collected by the background service.
+      </p>
+    </div>
+  <% end %>
+
+</div>

@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  date: 2026-01-18
+  current_charge: 9.99
+  exported_to_battery: 9.99
+  imported_from_battery: 9.99
+  imported_from_grid: 9.99
+
+two:
+  date: 2026-01-18
+  current_charge: 9.99
+  exported_to_battery: 9.99
+  imported_from_battery: 9.99
+  imported_from_grid: 9.99
