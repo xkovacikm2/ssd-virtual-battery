@@ -8,6 +8,7 @@ data:
   RAILS_ENV: {{ .Values.rails.railsEnv | quote }}
   RAILS_LOG_TO_STDOUT: "true"
   RAILS_SERVE_STATIC_FILES: "true"
+  HTTP_PORT: "3000"
   POSTGRES_HOST: {{ include "ssd-virtual-battery.postgresqlHost" . | quote }}
   POSTGRES_PORT: "5432"
   POSTGRES_DB: {{ .Values.postgresql.auth.database | quote }}

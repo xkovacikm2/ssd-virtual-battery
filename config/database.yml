@@ -75,20 +75,9 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  primary: &primary_production
-    <<: *default
-    database: ssd_virtual_battery_production
-    username: ssd_virtual_battery
-    password: <%= ENV["SSD_VIRTUAL_BATTERY_DATABASE_PASSWORD"] %>
-  cache:
-    <<: *primary_production
-    database: ssd_virtual_battery_production_cache
-    migrations_paths: db/cache_migrate
-  queue:
-    <<: *primary_production
-    database: ssd_virtual_battery_production_queue
-    migrations_paths: db/queue_migrate
-  cable:
-    <<: *primary_production
-    database: ssd_virtual_battery_production_cable
-    migrations_paths: db/cable_migrate
+  <<: *default
+  database: <%= ENV.fetch("POSTGRES_DB", "ssd_virtual_battery_production") %>
+  username: <%= ENV.fetch("POSTGRES_USER", "ssd_virtual_battery") %>
+  password: <%= ENV["POSTGRES_PASSWORD"] %>
+  host: <%= ENV.fetch("POSTGRES_HOST", "127.0.0.1") %>
+  port: <%= ENV.fetch("POSTGRES_PORT", "5432") %>

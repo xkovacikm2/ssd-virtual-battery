@@ -1,31 +1,21 @@
 {{- if .Values.ingress.enabled }}
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
 metadata:
   name: {{ include "ssd-virtual-battery.fullname" . }}
   labels:
     {{- include "ssd-virtual-battery.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.className }}
-  {{- if .Values.ingress.tls.enabled }}
-  tls:
-    - hosts:
-        - {{ .Values.ingress.hostname }}
-      secretName: {{ .Values.ingress.tls.secretName }}
-  {{- end }}
-  rules:
-    - host: {{ .Values.ingress.hostname }}
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "ssd-virtual-battery.fullname" . }}
-                port:
-                  number: {{ .Values.service.port }}
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .Values.ingress.hostname }}`)
+      kind: Rule
+      services:
+        - name: {{ include "ssd-virtual-battery.fullname" . }}
+          port: {{ .Values.service.port }}
+      {{- if .Values.ingress.middlewares }}
+      middlewares:
+        {{- toYaml .Values.ingress.middlewares | nindent 8 }}
+      {{- end }}
 {{- end }}

@@ -1,17 +1,8 @@
 SSD Virtual Battery has been deployed!
 
-{{- if .Values.ingress.enabled }}
-
-Access the application at:
-  http{{ if .Values.ingress.tls.enabled }}s{{ end }}://{{ .Values.ingress.hostname }}
-
-{{- else }}
-
 Get the application URL by running:
   kubectl port-forward svc/{{ include "ssd-virtual-battery.fullname" . }} 3000:{{ .Values.service.port }}
   Then visit: http://localhost:3000
-
-{{- end }}
 
 To check the status of your pods:
   kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}

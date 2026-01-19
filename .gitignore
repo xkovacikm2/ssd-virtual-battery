@@ -71,3 +71,4 @@ yarn-debug.log*
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+helm/ssd-virtual-battery/kovkotop-values.yaml
