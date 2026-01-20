@@ -57,6 +57,10 @@ postgresql:
 ingress:
   enabled: true
   hostname: ssd-virtual-battery.example.com
+  # TLS configuration with cert-manager
+  tls:
+    enabled: false
+    issuer: letsencrypt-prod  # ClusterIssuer name
   # Optional: Add Traefik middlewares (e.g., for rate limiting, headers, etc.)
   # middlewares:
   #   - name: my-middleware

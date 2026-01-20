@@ -1,4 +1,76 @@
 {{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.tls.enabled }}
+---
+# Certificate for TLS
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "ssd-virtual-battery.fullname" . }}-tls
+  labels:
+    {{- include "ssd-virtual-battery.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "ssd-virtual-battery.fullname" . }}-tls-secret
+  issuerRef:
+    name: {{ .Values.ingress.tls.issuer }}
+    kind: ClusterIssuer
+  dnsNames:
+    - {{ .Values.ingress.hostname }}
+---
+# HTTPS IngressRoute
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "ssd-virtual-battery.fullname" . }}-https
+  labels:
+    {{- include "ssd-virtual-battery.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: Host(`{{ .Values.ingress.hostname }}`)
+      kind: Rule
+      services:
+        - name: {{ include "ssd-virtual-battery.fullname" . }}
+          port: {{ .Values.service.port }}
+      {{- if .Values.ingress.middlewares }}
+      middlewares:
+        {{- toYaml .Values.ingress.middlewares | nindent 8 }}
+      {{- end }}
+  tls:
+    secretName: {{ include "ssd-virtual-battery.fullname" . }}-tls-secret
+---
+# HTTP to HTTPS redirect
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "ssd-virtual-battery.fullname" . }}-http-redirect
+  labels:
+    {{- include "ssd-virtual-battery.labels" . | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`{{ .Values.ingress.hostname }}`)
+      kind: Rule
+      middlewares:
+        - name: {{ include "ssd-virtual-battery.fullname" . }}-redirect-https
+      services:
+        - name: {{ include "ssd-virtual-battery.fullname" . }}
+          port: {{ .Values.service.port }}
+---
+# Redirect middleware
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "ssd-virtual-battery.fullname" . }}-redirect-https
+  labels:
+    {{- include "ssd-virtual-battery.labels" . | nindent 4 }}
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+{{- else }}
+# HTTP-only IngressRoute
 apiVersion: traefik.io/v1alpha1
 kind: IngressRoute
 metadata:
@@ -18,4 +90,5 @@ spec:
       middlewares:
         {{- toYaml .Values.ingress.middlewares | nindent 8 }}
       {{- end }}
+{{- end }}
 {{- end }}

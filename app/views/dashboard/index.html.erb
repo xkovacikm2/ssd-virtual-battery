@@ -46,11 +46,48 @@
   </div>
 
   <% if @latest_reading %>
-    <div class="latest-reading" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-      <h3 style="margin-bottom: 10px;">Posledný záznam</h3>
-      <p style="color: #6c757d; margin: 0;">
-        Naposledy aktualizované: <%= @latest_reading.date.strftime('%d. %m. %Y') %>
-      </p>
+    <div class="latest-reading" style="margin-bottom: 30px;">
+      <h2 style="margin-bottom: 20px;">Posledný záznam (<%= @latest_reading.date.strftime('%d. %m. %Y') %>)</h2>
+      
+      <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        
+        <!-- Stav nabitia -->
+        <div class="metric-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Stav nabitia</div>
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+            <%= number_with_precision(@latest_reading.current_charge, precision: 2) %>
+          </div>
+          <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+        </div>
+
+        <!-- Exportované do batérie -->
+        <div class="metric-card" style="background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Exportované do batérie</div>
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+            <%= number_with_precision(@latest_reading.exported_to_battery, precision: 2) %>
+          </div>
+          <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+        </div>
+
+        <!-- Importované z batérie -->
+        <div class="metric-card" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Importované z batérie</div>
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+            <%= number_with_precision(@latest_reading.imported_from_battery, precision: 2) %>
+          </div>
+          <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+        </div>
+
+        <!-- Importované zo siete -->
+        <div class="metric-card" style="background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%); color: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+          <div style="font-size: 14px; opacity: 0.9; margin-bottom: 10px;">Importované zo siete</div>
+          <div style="font-size: 36px; font-weight: bold; margin-bottom: 5px;">
+            <%= number_with_precision(@latest_reading.imported_from_grid, precision: 2) %>
+          </div>
+          <div style="font-size: 14px; opacity: 0.8;">kWh</div>
+        </div>
+
+      </div>
     </div>
   <% else %>
     <div class="no-data" style="background: #fff3cd; color: #856404; padding: 20px; border-radius: 8px; border: 1px solid #ffeaa7;">
