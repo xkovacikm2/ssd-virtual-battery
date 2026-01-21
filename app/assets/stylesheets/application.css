@@ -8,3 +8,98 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+/* Dashboard styles */
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dashboard-title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.year-summary,
+.latest-reading {
+  margin-bottom: 30px;
+}
+
+.section-title {
+  margin-bottom: 20px;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.metric-card {
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.metric-card--current-charge {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.metric-card--exported {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.metric-card--imported-battery {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.metric-card--imported-grid {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.metric-card--charge-green {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.metric-card--exported-orange {
+  background: linear-gradient(135deg, #fc4a1a 0%, #f7b733 100%);
+}
+
+.metric-card--imported-purple {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
+
+.metric-card--imported-red {
+  background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+}
+
+.metric-label {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.metric-unit {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.no-data {
+  background: #fff3cd;
+  color: #856404;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ffeaa7;
+}
+
+.no-data p {
+  margin: 0;
+}

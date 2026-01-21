@@ -10,7 +10,7 @@ class VirtualBatteryDataCollectionJob < ApplicationJob
 
     # Create or update reading using model logic
     result = VirtualBatteryReading.create_from_profile_data(
-      date: date,
+      date: Date.yesterday,
       profile_data: profile_data,
       current_charge: current_charge
     )
