@@ -16,7 +16,7 @@ class VirtualBatteryDataCollectionJob < ApplicationJob
     )
     reading = result[:reading]
 
-    Rails.logger.info "Created reading for #{date}: charge=#{reading.current_charge} kWh, " \
+    Rails.logger.info "Created reading for yesterday: charge=#{reading.current_charge} kWh, " \
                       "exported=#{reading.exported_to_battery}, imported_battery=#{reading.imported_from_battery}, " \
                       "imported_grid=#{reading.imported_from_grid}"
   rescue StandardError => e
