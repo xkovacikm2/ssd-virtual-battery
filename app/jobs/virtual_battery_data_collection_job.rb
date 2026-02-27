@@ -2,22 +2,17 @@ class VirtualBatteryDataCollectionJob < ApplicationJob
   queue_as :default
 
   def perform
-    last_reading = VirtualBatteryReading.order(:date).last
-    current_charge = last_reading&.current_charge || 0.0
-
     ssd_client = SsdApiClient.new
     profile_data = ssd_client.fetch_profile_data_for_date
 
     # Create or update reading using model logic
     result = VirtualBatteryReading.create_from_profile_data(
       date: Date.yesterday,
-      profile_data: profile_data,
-      current_charge: current_charge
+      profile_data: profile_data
     )
     reading = result[:reading]
 
-    Rails.logger.info "Created reading for yesterday: charge=#{reading.current_charge} kWh, " \
-                      "exported=#{reading.exported_to_battery}, imported_battery=#{reading.imported_from_battery}, " \
+    Rails.logger.info "Created reading for yesterday: exported_grid=#{reading.exported_to_grid}, " \
                       "imported_grid=#{reading.imported_from_grid}"
   rescue StandardError => e
     Rails.logger.error "Failed to collect virtual battery data: #{e.message}"

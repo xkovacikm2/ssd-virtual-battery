@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_19_085758) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_27_124500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -137,10 +137,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_19_085758) do
 
   create_table "virtual_battery_readings", force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.decimal "current_charge", precision: 10, scale: 2, default: "0.0"
     t.date "date", null: false
-    t.decimal "exported_to_battery", precision: 10, scale: 2, default: "0.0"
-    t.decimal "imported_from_battery", precision: 10, scale: 2, default: "0.0"
+    t.decimal "exported_to_grid", precision: 10, scale: 2, default: "0.0"
     t.decimal "imported_from_grid", precision: 10, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
     t.index ["date"], name: "index_virtual_battery_readings_on_date", unique: true

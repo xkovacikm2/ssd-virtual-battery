@@ -10,6 +10,7 @@ Datamine and visualise information about status of charge of your virtual batter
   - Total electricity exported to virtual battery
   - Total electricity imported from virtual battery
   - Total electricity imported from public grid
+- **Grid Flow Logic**: Daily incoming energy is stored as imported from public grid, and daily outgoing energy is stored as exported to public grid.
 - **Background Service**: Automated data collection job
 - **PostgreSQL Database**: Stores daily readings with proper indexing
 
@@ -90,9 +91,7 @@ Example cron entry:
 | Column                    | Type    | Description                                      |
 |---------------------------|---------|--------------------------------------------------|
 | date                      | date    | Date of the reading (unique)                     |
-| current_charge            | decimal | Current charge status in kWh                     |
-| exported_to_battery       | decimal | Daily electricity exported to virtual battery    |
-| imported_from_battery     | decimal | Daily electricity imported from virtual battery  |
+| exported_to_grid          | decimal | Daily electricity sent to public grid            |
 | imported_from_grid        | decimal | Daily electricity imported from public grid      |
 
 ## Development

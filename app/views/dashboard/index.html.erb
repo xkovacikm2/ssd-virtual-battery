@@ -6,38 +6,29 @@
     
     <div class="metrics-grid">
       
-      <!-- Aktuálny stav nabitia -->
+      <!-- Kumulatívne odoslané do siete v aktuálnom roku -->
       <div class="metric-card metric-card--current-charge">
-        <div class="metric-label">Aktuálny stav nabitia</div>
+        <div class="metric-label">Kumulatívne odoslané do siete (aktuálny rok)</div>
         <div class="metric-value">
-          <%= number_with_precision(@summary[:current_charge], precision: 2) %>
+          <%= number_with_precision(@summary[:total_exported_to_grid], precision: 2) %>
         </div>
         <div class="metric-unit">kWh</div>
       </div>
 
-      <!-- Exportované do batérie -->
+      <!-- Kumulatívne prijaté zo siete v aktuálnom roku -->
       <div class="metric-card metric-card--exported">
-        <div class="metric-label">Exportované do virtuálnej batérie</div>
-        <div class="metric-value">
-          <%= number_with_precision(@summary[:total_exported_to_battery], precision: 2) %>
-        </div>
-        <div class="metric-unit">kWh</div>
-      </div>
-
-      <!-- Importované z batérie -->
-      <div class="metric-card metric-card--imported-battery">
-        <div class="metric-label">Importované z virtuálnej batérie</div>
-        <div class="metric-value">
-          <%= number_with_precision(@summary[:total_imported_from_battery], precision: 2) %>
-        </div>
-        <div class="metric-unit">kWh</div>
-      </div>
-
-      <!-- Importované zo siete -->
-      <div class="metric-card metric-card--imported-grid">
-        <div class="metric-label">Importované z verejnej siete</div>
+        <div class="metric-label">Kumulatívne prijaté zo siete (aktuálny rok)</div>
         <div class="metric-value">
           <%= number_with_precision(@summary[:total_imported_from_grid], precision: 2) %>
+        </div>
+        <div class="metric-unit">kWh</div>
+      </div>
+
+      <!-- Kumulatívne saldo siete v aktuálnom roku -->
+      <div class="metric-card metric-card--imported-grid">
+        <div class="metric-label">Kumulatívne saldo siete (aktuálny rok)</div>
+        <div class="metric-value">
+          <%= number_with_precision(@summary[:net_grid_flow], precision: 2) %>
         </div>
         <div class="metric-unit">kWh</div>
       </div>
@@ -50,37 +41,19 @@
       <h2 class="section-title">Posledný záznam (<%= @latest_reading.date.strftime('%d. %m. %Y') %>)</h2>
       
       <div class="metrics-grid">
-        
-        <!-- Stav nabitia -->
-        <div class="metric-card metric-card--charge-green">
-          <div class="metric-label">Stav nabitia</div>
-          <div class="metric-value">
-            <%= number_with_precision(@latest_reading.current_charge, precision: 2) %>
-          </div>
-          <div class="metric-unit">kWh</div>
-        </div>
 
-        <!-- Exportované do batérie -->
+        <!-- Odoslané do siete -->
         <div class="metric-card metric-card--exported-orange">
-          <div class="metric-label">Exportované do batérie</div>
+          <div class="metric-label">Odoslané do siete</div>
           <div class="metric-value">
-            <%= number_with_precision(@latest_reading.exported_to_battery, precision: 2) %>
+            <%= number_with_precision(@latest_reading.exported_to_grid, precision: 2) %>
           </div>
           <div class="metric-unit">kWh</div>
         </div>
 
-        <!-- Importované z batérie -->
+        <!-- Prijaté zo siete -->
         <div class="metric-card metric-card--imported-purple">
-          <div class="metric-label">Importované z batérie</div>
-          <div class="metric-value">
-            <%= number_with_precision(@latest_reading.imported_from_battery, precision: 2) %>
-          </div>
-          <div class="metric-unit">kWh</div>
-        </div>
-
-        <!-- Importované zo siete -->
-        <div class="metric-card metric-card--imported-red">
-          <div class="metric-label">Importované zo siete</div>
+          <div class="metric-label">Prijaté zo siete</div>
           <div class="metric-value">
             <%= number_with_precision(@latest_reading.imported_from_grid, precision: 2) %>
           </div>

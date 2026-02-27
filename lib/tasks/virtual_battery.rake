@@ -23,9 +23,6 @@ namespace :virtual_battery do
     # Initialize SSD API client
     ssd_client = SsdApiClient.new
 
-    # Get the current charge from the last reading (or 0 if none)
-    current_charge = last_reading&.current_charge || 0.0
-
     # Process each day
     (start_date..end_date).each do |date|
       puts "Fetching data for #{date}..."
@@ -37,14 +34,11 @@ namespace :virtual_battery do
         # Create or update reading using model logic
         result = VirtualBatteryReading.create_from_profile_data(
           date: date,
-          profile_data: profile_data,
-          current_charge: current_charge
+          profile_data: profile_data
         )
         reading = result[:reading]
-        current_charge = result[:current_charge]
 
-        puts "  ✓ Created reading for #{date}: charge=#{reading.current_charge} kWh, " \
-             "exported=#{reading.exported_to_battery}, imported_battery=#{reading.imported_from_battery}, " \
+        puts "  ✓ Created reading for #{date}: exported_grid=#{reading.exported_to_grid}, " \
              "imported_grid=#{reading.imported_from_grid}"
 
       rescue StandardError => e

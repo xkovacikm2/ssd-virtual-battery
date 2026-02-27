@@ -2,14 +2,10 @@
 
 one:
   date: 2025-01-15
-  current_charge: 75.50
-  exported_to_battery: 25.00
-  imported_from_battery: 20.00
+  exported_to_grid: 25.00
   imported_from_grid: 10.00
 
 two:
   date: 2025-01-16
-  current_charge: 80.25
-  exported_to_battery: 30.00
-  imported_from_battery: 25.00
+  exported_to_grid: 30.00
   imported_from_grid: 12.00
