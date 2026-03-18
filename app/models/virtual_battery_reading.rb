@@ -22,6 +22,22 @@ class VirtualBatteryReading < ApplicationRecord
     }
   end
 
+  # Returns daily cumulative export and import for the current year (for charting)
+  def self.daily_chart_data
+    readings = current_year.order(:date)
+    cumulative_exported = 0
+    cumulative_imported = 0
+    readings.map do |r|
+      cumulative_exported += r.exported_to_grid
+      cumulative_imported += r.imported_from_grid
+      {
+        date: r.date.iso8601,
+        cumulative_exported: cumulative_exported.round(2),
+        cumulative_imported: cumulative_imported.round(2)
+      }
+    end
+  end
+
   # Create or update a reading from profile data for a specific date
   # Returns the reading
   def self.create_from_profile_data(date:, profile_data:)

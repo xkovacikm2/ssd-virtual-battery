@@ -10,7 +10,8 @@
         "Shopify.ruby-lsp",
         "bradlc.vscode-tailwindcss",
         "ms-azuretools.vscode-containers",
-        "cweijan.vscode-database-client2"
+        "cweijan.vscode-database-client2",
+        "KoichiSasada.vscode-rdbg"
       ]
     }
   },

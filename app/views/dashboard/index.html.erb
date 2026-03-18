@@ -36,6 +36,16 @@
     </div>
   </div>
 
+  <% if @chart_data.any? %>
+    <div class="burndown-chart"
+         data-controller="burndown-chart"
+         data-burndown-chart-readings-value="<%= @chart_data.to_json %>"
+         data-burndown-chart-max-capacity-value="<%= VirtualBatteryReading::VIRTUAL_BATTERY_MAX_CAPACITY %>">
+      <h2 class="section-title">Stav virtuálnej batérie (<%= Date.current.year %>)</h2>
+      <canvas data-burndown-chart-target="canvas" style="width:100%;max-height:350px"></canvas>
+    </div>
+  <% end %>
+
   <% if @latest_reading %>
     <div class="latest-reading">
       <h2 class="section-title">Posledný záznam (<%= @latest_reading.date.strftime('%d. %m. %Y') %>)</h2>
@@ -56,6 +66,15 @@
           <div class="metric-label">Prijaté zo siete</div>
           <div class="metric-value">
             <%= number_with_precision(@latest_reading.imported_from_grid, precision: 2) %>
+          </div>
+          <div class="metric-unit">kWh</div>
+        </div>
+
+        <!-- Rozdiel (export - import) -->
+        <div class="metric-card metric-card--imported-grid">
+          <div class="metric-label">Rozdiel (odoslané - prijaté)</div>
+          <div class="metric-value">
+            <%= number_with_precision(@latest_reading.exported_to_grid - @latest_reading.imported_from_grid, precision: 2) %>
           </div>
           <div class="metric-unit">kWh</div>
         </div>
