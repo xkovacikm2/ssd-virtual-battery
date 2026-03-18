@@ -39,6 +39,9 @@ Datamine and visualise information about status of charge of your virtual batter
 4. The container will build and install all dependencies automatically
 
 5. Once the container is ready, the database will be created and migrated
+   
+6. Copy .env.template as .env and provide values for variables. Name and password for your SSD provider at [ims.ssd.sk](https://ims.ssd.sk/login)
+   and id of your extraction point.
 
 ### Manual Setup
 
