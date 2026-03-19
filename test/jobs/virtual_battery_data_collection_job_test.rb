@@ -1,6 +1,24 @@
 require "test_helper"
 
 class VirtualBatteryDataCollectionJobTest < ActiveJob::TestCase
+  FAKE_PROFILE_DATA = [
+    { incoming: "3.0", outgoing: "5.0" },
+    { incoming: "2.0", outgoing: "4.0" }
+  ].freeze
+
+  FakeApiClient = Struct.new(:profile_data) do
+    def fetch_profile_data_for_date = profile_data
+  end
+
+  setup do
+    fake = FakeApiClient.new(FAKE_PROFILE_DATA)
+    SsdApiClient.define_singleton_method(:new) { fake }
+  end
+
+  teardown do
+    SsdApiClient.singleton_class.remove_method(:new)
+  end
+
   test "should create a reading for yesterday if it doesn't exist" do
     VirtualBatteryReading.where(date: Date.yesterday).destroy_all
 
