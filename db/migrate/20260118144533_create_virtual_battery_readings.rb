@@ -9,7 +9,7 @@ class CreateVirtualBatteryReadings < ActiveRecord::Migration[8.1]
 
       t.timestamps
     end
-    
+
     add_index :virtual_battery_readings, :date, unique: true
   end
 end
