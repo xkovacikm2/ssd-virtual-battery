@@ -19,6 +19,7 @@ export default class extends Controller {
   // private
 
   #renderChart() {
+    const isMobile    = window.innerWidth < 600
     const raw         = this.readingsValue
     const maxCapacity = this.maxCapacityValue
     const labels      = raw.map(d => d.date)
@@ -106,9 +107,16 @@ export default class extends Controller {
       },
       options: {
         responsive: true,
+        maintainAspectRatio: false,
         interaction: { mode: "index", intersect: false },
         plugins: {
-          legend: { position: "bottom" },
+          legend: {
+            position: "bottom",
+            labels: {
+              boxWidth: isMobile ? 8 : 12,
+              font: { size: isMobile ? 10 : 12 }
+            }
+          },
           tooltip: {
             callbacks: {
               label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y ?? "-"} kWh`
@@ -116,7 +124,7 @@ export default class extends Controller {
           }
         },
         scales: {
-          x: { ticks: { maxTicksLimit: 12, maxRotation: 45 } },
+          x: { ticks: { maxTicksLimit: isMobile ? 6 : 12, maxRotation: 45 } },
           y: {
             min: 0,
             suggestedMax: maxCapacity * 1.05,

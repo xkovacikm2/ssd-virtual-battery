@@ -42,7 +42,9 @@
          data-burndown-chart-readings-value="<%= @chart_data.to_json %>"
          data-burndown-chart-max-capacity-value="<%= VirtualBatteryReading::VIRTUAL_BATTERY_MAX_CAPACITY %>">
       <h2 class="section-title">Stav virtuálnej batérie (<%= Date.current.year %>)</h2>
-      <canvas data-burndown-chart-target="canvas" style="width:100%;max-height:350px"></canvas>
+      <div class="chart-wrapper">
+        <canvas data-burndown-chart-target="canvas"></canvas>
+      </div>
     </div>
   <% end %>
 

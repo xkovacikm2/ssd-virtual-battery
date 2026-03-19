@@ -111,3 +111,22 @@
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.burndown-chart .chart-wrapper {
+  position: relative;
+  height: 350px;
+}
+
+@media (max-width: 600px) {
+  .burndown-chart {
+    padding: 12px;
+  }
+
+  .burndown-chart .chart-wrapper {
+    height: 320px;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}
