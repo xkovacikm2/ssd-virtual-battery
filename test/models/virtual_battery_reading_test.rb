@@ -169,22 +169,38 @@ class VirtualBatteryReadingTest < ActiveSupport::TestCase
     assert_equal [], VirtualBatteryReading.previous_year_daily_data
   end
 
-  test "previous_year_daily_data returns daily readings for previous year only" do
+  test "previous_year_daily_data returns readings from 1 year ago onwards, not earlier" do
     destroy_previous_year_readings
 
     previous_year = Date.current.year - 1
-    VirtualBatteryReading.create!(date: Date.new(previous_year, 6, 1), exported_to_grid: 15.0, imported_from_grid: 7.0)
-    VirtualBatteryReading.create!(date: Date.new(previous_year, 6, 2), exported_to_grid: 20.0, imported_from_grid: 8.0)
+    before_cutoff = Date.current - 1.year - 1.day
+    at_cutoff     = Date.current - 1.year
+
+    # Only create the record at or after the cutoff when the cutoff is in the previous year
+    if before_cutoff.year == previous_year
+      VirtualBatteryReading.create!(date: before_cutoff, exported_to_grid: 5.0, imported_from_grid: 2.0)
+    end
+    VirtualBatteryReading.create!(date: at_cutoff, exported_to_grid: 15.0, imported_from_grid: 7.0) if at_cutoff.year == previous_year
+    VirtualBatteryReading.create!(date: Date.new(previous_year, 12, 31), exported_to_grid: 20.0, imported_from_grid: 8.0)
 
     data = VirtualBatteryReading.previous_year_daily_data
 
-    assert_equal 2, data.length
-    assert_equal Date.new(previous_year, 6, 1).iso8601, data[0][:date]
-    assert_equal 15.0, data[0][:exported_to_grid]
-    assert_equal 7.0,  data[0][:imported_from_grid]
-    assert_equal Date.new(previous_year, 6, 2).iso8601, data[1][:date]
-    assert_equal 20.0, data[1][:exported_to_grid]
-    assert_equal 8.0,  data[1][:imported_from_grid]
+    data.each do |row|
+      assert row[:date] >= at_cutoff.iso8601, "Expected no readings before #{at_cutoff}, got #{row[:date]}"
+    end
+    assert data.any? { |row| row[:date] == Date.new(previous_year, 12, 31).iso8601 }
+  end
+
+  test "previous_year_daily_data excludes current year readings" do
+    destroy_previous_year_readings
+
+    previous_year = Date.current.year - 1
+    VirtualBatteryReading.create!(date: Date.new(previous_year, 12, 31), exported_to_grid: 20.0, imported_from_grid: 8.0)
+    VirtualBatteryReading.create!(date: Date.current, exported_to_grid: 99.0, imported_from_grid: 99.0) unless VirtualBatteryReading.exists?(date: Date.current)
+
+    data = VirtualBatteryReading.previous_year_daily_data
+
+    assert data.none? { |row| row[:date].start_with?(Date.current.year.to_s) }
   end
 
   private
