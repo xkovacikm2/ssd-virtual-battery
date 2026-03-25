@@ -38,6 +38,14 @@ class VirtualBatteryReading < ApplicationRecord
     end
   end
 
+  # Returns daily export and import values from 1 year ago to end of previous year (for projection)
+  def self.previous_year_daily_data
+    previous_year = Date.current.year - 1
+    where(date: (Date.current - 1.year)..Date.new(previous_year).end_of_year)
+      .order(:date)
+      .map { |r| { date: r.date.iso8601, exported_to_grid: r.exported_to_grid, imported_from_grid: r.imported_from_grid } }
+  end
+
   # Create or update a reading from profile data for a specific date
   # Returns the reading
   def self.create_from_profile_data(date:, profile_data:)

@@ -162,4 +162,51 @@ class VirtualBatteryReadingTest < ActiveSupport::TestCase
     assert_equal 10.0, data[0][:cumulative_exported]
     assert_equal 5.0,  data[0][:cumulative_imported]
   end
+
+  test "previous_year_daily_data returns empty array when no previous year readings exist" do
+    destroy_previous_year_readings
+
+    assert_equal [], VirtualBatteryReading.previous_year_daily_data
+  end
+
+  test "previous_year_daily_data returns readings from 1 year ago onwards, not earlier" do
+    destroy_previous_year_readings
+
+    previous_year = Date.current.year - 1
+    before_cutoff = Date.current - 1.year - 1.day
+    at_cutoff     = Date.current - 1.year
+
+    # Only create the record at or after the cutoff when the cutoff is in the previous year
+    if before_cutoff.year == previous_year
+      VirtualBatteryReading.create!(date: before_cutoff, exported_to_grid: 5.0, imported_from_grid: 2.0)
+    end
+    VirtualBatteryReading.create!(date: at_cutoff, exported_to_grid: 15.0, imported_from_grid: 7.0) if at_cutoff.year == previous_year
+    VirtualBatteryReading.create!(date: Date.new(previous_year, 12, 31), exported_to_grid: 20.0, imported_from_grid: 8.0)
+
+    data = VirtualBatteryReading.previous_year_daily_data
+
+    data.each do |row|
+      assert row[:date] >= at_cutoff.iso8601, "Expected no readings before #{at_cutoff}, got #{row[:date]}"
+    end
+    assert data.any? { |row| row[:date] == Date.new(previous_year, 12, 31).iso8601 }
+  end
+
+  test "previous_year_daily_data excludes current year readings" do
+    destroy_previous_year_readings
+
+    previous_year = Date.current.year - 1
+    VirtualBatteryReading.create!(date: Date.new(previous_year, 12, 31), exported_to_grid: 20.0, imported_from_grid: 8.0)
+    VirtualBatteryReading.create!(date: Date.current, exported_to_grid: 99.0, imported_from_grid: 99.0) unless VirtualBatteryReading.exists?(date: Date.current)
+
+    data = VirtualBatteryReading.previous_year_daily_data
+
+    assert data.none? { |row| row[:date].start_with?(Date.current.year.to_s) }
+  end
+
+  private
+
+  def destroy_previous_year_readings
+    previous_year = Date.current.year - 1
+    VirtualBatteryReading.where(date: Date.new(previous_year).beginning_of_year..Date.new(previous_year).end_of_year).destroy_all
+  end
 end
