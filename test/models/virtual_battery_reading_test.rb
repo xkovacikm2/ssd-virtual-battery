@@ -162,4 +162,35 @@ class VirtualBatteryReadingTest < ActiveSupport::TestCase
     assert_equal 10.0, data[0][:cumulative_exported]
     assert_equal 5.0,  data[0][:cumulative_imported]
   end
+
+  test "previous_year_daily_data returns empty array when no previous year readings exist" do
+    destroy_previous_year_readings
+
+    assert_equal [], VirtualBatteryReading.previous_year_daily_data
+  end
+
+  test "previous_year_daily_data returns daily readings for previous year only" do
+    destroy_previous_year_readings
+
+    previous_year = Date.current.year - 1
+    VirtualBatteryReading.create!(date: Date.new(previous_year, 6, 1), exported_to_grid: 15.0, imported_from_grid: 7.0)
+    VirtualBatteryReading.create!(date: Date.new(previous_year, 6, 2), exported_to_grid: 20.0, imported_from_grid: 8.0)
+
+    data = VirtualBatteryReading.previous_year_daily_data
+
+    assert_equal 2, data.length
+    assert_equal Date.new(previous_year, 6, 1).iso8601, data[0][:date]
+    assert_equal 15.0, data[0][:exported_to_grid]
+    assert_equal 7.0,  data[0][:imported_from_grid]
+    assert_equal Date.new(previous_year, 6, 2).iso8601, data[1][:date]
+    assert_equal 20.0, data[1][:exported_to_grid]
+    assert_equal 8.0,  data[1][:imported_from_grid]
+  end
+
+  private
+
+  def destroy_previous_year_readings
+    previous_year = Date.current.year - 1
+    VirtualBatteryReading.where(date: Date.new(previous_year).beginning_of_year..Date.new(previous_year).end_of_year).destroy_all
+  end
 end

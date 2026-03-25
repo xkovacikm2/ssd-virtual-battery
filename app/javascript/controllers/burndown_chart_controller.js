@@ -4,8 +4,9 @@ import Chart from "chart.js/auto"
 export default class extends Controller {
   static targets = ["canvas"]
   static values  = {
-    readings:    Array,
-    maxCapacity: Number
+    readings:             Array,
+    maxCapacity:          Number,
+    previousYearReadings: Array
   }
 
   connect() {
@@ -26,10 +27,14 @@ export default class extends Controller {
     const exportData  = raw.map(d => parseFloat(d.cumulative_exported))
     const importData  = raw.map(d => parseFloat(d.cumulative_imported))
 
+    const prevYear       = this.previousYearReadingsValue
+    const prevYearExport = prevYear.map(d => ({ date: d.date, value: parseFloat(d.exported_to_grid) }))
+    const prevYearImport = prevYear.map(d => ({ date: d.date, value: parseFloat(d.imported_from_grid) }))
+
     const { projLabels: exportProjLabels, projValues: exportProjValues } =
-      this.#projectSeries(exportData, labels, maxCapacity)
+      this.#projectSeries(exportData, labels, maxCapacity, prevYearExport)
     const { projLabels: importProjLabels, projValues: importProjValues } =
-      this.#projectSeries(importData, labels, maxCapacity)
+      this.#projectSeries(importData, labels, maxCapacity, prevYearImport)
 
     const projLabelSet = Array.from(new Set([...exportProjLabels, ...importProjLabels])).sort()
     const allLabels    = labels.concat(projLabelSet)
@@ -135,27 +140,50 @@ export default class extends Controller {
     })
   }
 
-  #projectSeries(values, labels, maxCapacity) {
+  #projectSeries(values, labels, maxCapacity, prevYearDailyValues = []) {
     if (values.length < 2) return { projLabels: [], projValues: [] }
 
-    const windowSize = Math.min(14, values.length)
-    const recent     = values.slice(-windowSize)
-    const avgDaily   = (recent[recent.length - 1] - recent[0]) / (windowSize - 1)
-    const lastDate   = new Date(labels[labels.length - 1])
-    const lastValue  = parseFloat(values[values.length - 1])
-    const yearEnd    = new Date(lastDate.getFullYear(), 11, 31)
+    const lastDate  = new Date(labels[labels.length - 1])
+    const lastValue = parseFloat(values[values.length - 1])
+    const yearEnd   = new Date(lastDate.getFullYear(), 11, 31)
     const projLabels = []
     const projValues = []
 
-    let d    = new Date(lastDate)
-    let step = 0
+    // Build a MM-DD → daily value lookup from previous year data
+    const prevLookup = {}
+    prevYearDailyValues.forEach(d => {
+      prevLookup[d.date.slice(5, 10)] = d.value  // key: "MM-DD"
+    })
+    const hasPrevYearData = prevYearDailyValues.length > 0
+
+    // Fallback: average daily change from last 2 weeks
+    const windowSize = Math.min(14, values.length)
+    const recent     = values.slice(-windowSize)
+    const avgDaily   = (recent[recent.length - 1] - recent[0]) / (windowSize - 1)
+
+    // Average daily value from previous year (used when a specific day is missing)
+    const prevYearAvgDaily = hasPrevYearData
+      ? prevYearDailyValues.reduce((sum, d) => sum + d.value, 0) / prevYearDailyValues.length
+      : avgDaily
+
+    let d        = new Date(lastDate)
+    let cumValue = lastValue
     d.setDate(d.getDate() + 1)
 
     while (d <= yearEnd) {
-      step++
-      projLabels.push(d.toISOString().slice(0, 10))
-      const val = lastValue + avgDaily * step
-      projValues.push(isFinite(val) ? parseFloat(Math.min(val, maxCapacity).toFixed(2)) : null)
+      const dateStr  = d.toISOString().slice(0, 10)  // "YYYY-MM-DD"
+      const monthDay = dateStr.slice(5)               // "MM-DD"
+      let dailyIncrement
+
+      if (hasPrevYearData) {
+        dailyIncrement = prevLookup[monthDay] !== undefined ? prevLookup[monthDay] : prevYearAvgDaily
+      } else {
+        dailyIncrement = avgDaily
+      }
+
+      cumValue += dailyIncrement
+      projLabels.push(dateStr)
+      projValues.push(isFinite(cumValue) ? parseFloat(Math.min(cumValue, maxCapacity).toFixed(2)) : null)
       d.setDate(d.getDate() + 1)
     }
 
