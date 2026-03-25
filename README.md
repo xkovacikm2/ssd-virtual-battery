@@ -1,17 +1,22 @@
 # SSD Virtual Battery Dashboard
 
+[![Security Scan](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/scan.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/scan.yml)
+[![Lint](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/lint.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/lint.yml)
+[![Tests](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/test.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/test.yml)
+[![Docker](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/docker.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/docker.yml)
+
 Datamine and visualise information about status of charge of your virtual battery from SSD provider.
 
 ## Features
 
-- **Dashboard**: View current charge status and cumulative statistics for the current calendar year
+- **Dashboard**: View cumulative statistics for the current calendar year and the latest daily reading
 - **Metrics Tracked**:
-  - Current charge in kWh
-  - Total electricity exported to virtual battery
-  - Total electricity imported from virtual battery
-  - Total electricity imported from public grid
-- **Grid Flow Logic**: Daily incoming energy is stored as imported from public grid, and daily outgoing energy is stored as exported to public grid.
-- **Background Service**: Automated data collection job
+  - Total electricity exported to grid (year-to-date)
+  - Total electricity imported from grid (year-to-date)
+  - Net virtual battery balance (year-to-date)
+- **Grid Flow Logic**: Daily outgoing energy is stored as `exported_to_grid`; daily incoming energy is stored as `imported_from_grid`. Virtual battery balance is calculated as `min(total_exported, 6000) - total_imported` (virtual battery capacity: 6,000 kWh).
+- **Burndown Chart**: Visualises cumulative daily exports and imports for the current year alongside the previous year for comparison
+- **Background Service**: Automated data collection job that fetches 15-minute interval data from the SSD provider and aggregates it into daily readings
 - **PostgreSQL Database**: Stores daily readings with proper indexing
 
 ## Prerequisites
@@ -91,11 +96,24 @@ Example cron entry:
 
 ### VirtualBatteryReading Model
 
-| Column                    | Type    | Description                                      |
-|---------------------------|---------|--------------------------------------------------|
-| date                      | date    | Date of the reading (unique)                     |
-| exported_to_grid          | decimal | Daily electricity sent to public grid            |
-| imported_from_grid        | decimal | Daily electricity imported from public grid      |
+**Stored columns** (one record per calendar date):
+
+| Column                    | Type         | Description                                           |
+|---------------------------|--------------|-------------------------------------------------------|
+| date                      | date         | Date of the reading (unique, required)                |
+| exported_to_grid          | decimal(10,2)| Daily electricity sent to the grid (kWh), default 0  |
+| imported_from_grid        | decimal(10,2)| Daily electricity taken from the grid (kWh), default 0|
+
+**Calculated values** (computed in memory, not stored):
+
+| Value                     | Description                                                                 |
+|---------------------------|-----------------------------------------------------------------------------|
+| Year-to-date export total | Sum of `exported_to_grid` for all readings in the current year              |
+| Year-to-date import total | Sum of `imported_from_grid` for all readings in the current year            |
+| Net balance               | `min(total_exported, 6000) - total_imported` (virtual battery capacity: 6,000 kWh) |
+| Daily difference          | `exported_to_grid − imported_from_grid` for the latest reading              |
+| Cumulative chart data     | Running totals of exports and imports by date for the current year          |
+| Previous year comparison  | Daily cumulative values from the previous year used as a projection baseline|
 
 ## Development
 
@@ -120,7 +138,7 @@ bin/bundler-audit
 
 ## Technology Stack
 
-- **Ruby**: 3.2.3
+- **Ruby**: 3.3
 - **Rails**: 8.1.2
 - **Database**: PostgreSQL 16
 - **Background Jobs**: Active Job with Solid Queue
@@ -128,7 +146,6 @@ bin/bundler-audit
 
 ## Future Enhancements
 
-- Integration with actual SSD provider API
 - Historical data charts and graphs
 - Export data to CSV/PDF
 - Alert system for charge levels
