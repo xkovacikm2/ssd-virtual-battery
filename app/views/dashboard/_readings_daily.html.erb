@@ -1,0 +1,32 @@
+<table class="readings-table">
+  <thead>
+    <tr>
+      <th>Dátum</th>
+      <th>Deň</th>
+      <th class="text-right">Odoslané (kWh)</th>
+      <th class="text-right">Prijaté (kWh)</th>
+      <th class="text-right">Rozdiel (kWh)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @daily_readings.each do |r| %>
+      <tr>
+        <td><%= r[:date].strftime('%d. %m. %Y') %></td>
+        <td><%= slovak_day_name(r[:date]) %></td>
+        <td class="text-right"><%= number_with_precision(r[:exported], precision: 2) %></td>
+        <td class="text-right"><%= number_with_precision(r[:imported], precision: 2) %></td>
+        <td class="text-right"><%= number_with_precision(r[:exported] - r[:imported], precision: 2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<div class="readings-pagination">
+  <% if @has_older %>
+    <%= link_to "← Staršie", dashboard_readings_path(tab: "daily", page: @page + 1), class: "pagination-link" %>
+  <% end %>
+  <div class="pagination-spacer"></div>
+  <% if @has_newer %>
+    <%= link_to "Novšie →", dashboard_readings_path(tab: "daily", page: @page - 1), class: "pagination-link" %>
+  <% end %>
+</div>

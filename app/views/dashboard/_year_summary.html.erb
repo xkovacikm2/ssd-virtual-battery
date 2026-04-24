@@ -1,0 +1,34 @@
+<div class="year-summary">
+  <h2 class="section-title">Ročný súhrn (<%= Date.current.year %>)</h2>
+  
+  <div class="metrics-grid">
+    
+    <!-- Kumulatívne odoslané do siete v aktuálnom roku -->
+    <div class="metric-card metric-card--current-charge">
+      <div class="metric-label">Kumulatívne odoslané do siete (aktuálny rok)</div>
+      <div class="metric-value">
+        <%= number_with_precision(@summary[:total_exported_to_grid], precision: 2) %>
+      </div>
+      <div class="metric-unit">kWh</div>
+    </div>
+
+    <!-- Kumulatívne prijaté zo siete v aktuálnom roku -->
+    <div class="metric-card metric-card--exported">
+      <div class="metric-label">Kumulatívne prijaté zo siete (aktuálny rok)</div>
+      <div class="metric-value">
+        <%= number_with_precision(@summary[:total_imported_from_grid], precision: 2) %>
+      </div>
+      <div class="metric-unit">kWh</div>
+    </div>
+
+    <!-- Kumulatívne saldo siete v aktuálnom roku -->
+    <div class="metric-card metric-card--imported-grid">
+      <div class="metric-label">Kumulatívne saldo siete (aktuálny rok)</div>
+      <div class="metric-value">
+        <%= number_with_precision(@summary[:net_grid_flow], precision: 2) %>
+      </div>
+      <div class="metric-unit">kWh</div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,8 @@
+<div class="readings-tabs">
+  <%= link_to "Denné", dashboard_readings_path(tab: "daily"),
+      class: "readings-tab #{'readings-tab--active' if @tab == 'daily'}" %>
+  <%= link_to "Týždenné", dashboard_readings_path(tab: "weekly"),
+      class: "readings-tab #{'readings-tab--active' if @tab == 'weekly'}" %>
+  <%= link_to "Mesačné", dashboard_readings_path(tab: "monthly"),
+      class: "readings-tab #{'readings-tab--active' if @tab == 'monthly'}" %>
+</div>
