@@ -2,7 +2,6 @@
   <thead>
     <tr>
       <th>Dátum</th>
-      <th>Deň</th>
       <th class="text-right">Odoslané (kWh)</th>
       <th class="text-right">Prijaté (kWh)</th>
       <th class="text-right">Rozdiel (kWh)</th>
@@ -11,8 +10,7 @@
   <tbody>
     <% @daily_readings.each do |r| %>
       <tr>
-        <td><%= r[:date].strftime('%d. %m. %Y') %></td>
-        <td><%= slovak_day_name(r[:date]) %></td>
+        <td><%= slovak_day_name(r[:date]) %> <%= r[:date].strftime('%d. %m.') %></td>
         <td class="text-right"><%= number_with_precision(r[:exported], precision: 2) %></td>
         <td class="text-right"><%= number_with_precision(r[:imported], precision: 2) %></td>
         <td class="text-right"><%= number_with_precision(r[:exported] - r[:imported], precision: 2) %></td>
