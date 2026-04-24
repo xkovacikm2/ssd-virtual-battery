@@ -28,7 +28,7 @@ class DashboardController < ApplicationController
   end
 
   def load_daily_data
-    end_date = Date.current - (@page * 7)
+    end_date = Date.yesterday - (@page * 7)
     start_date = end_date - 6
     readings_by_date = VirtualBatteryReading
       .where(date: start_date..end_date)

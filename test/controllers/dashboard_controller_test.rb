@@ -110,13 +110,12 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
 
   # --- Daily view rendering ---
 
-  test "daily view renders all 5 table columns" do
+  test "daily view renders all 4 table columns" do
     VirtualBatteryReading.create!(date: Date.current, exported_to_grid: 18.5, imported_from_grid: 6.3)
 
     get dashboard_readings_url(tab: "daily")
-    assert_select ".readings-table th", count: 5
+    assert_select ".readings-table th", count: 4
     assert_select ".readings-table th", text: "Dátum"
-    assert_select ".readings-table th", text: "Deň"
     assert_select ".readings-table th", text: "Odoslané (kWh)"
     assert_select ".readings-table th", text: "Prijaté (kWh)"
     assert_select ".readings-table th", text: "Rozdiel (kWh)"
@@ -132,12 +131,12 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "daily view shows correct values for a reading" do
-    reading_date = Date.current
+    reading_date = Date.yesterday
     VirtualBatteryReading.create!(date: reading_date, exported_to_grid: 25.50, imported_from_grid: 8.75)
 
     get dashboard_readings_url(tab: "daily")
     assert_select ".readings-table tbody tr" do
-      assert_select "td", text: reading_date.strftime("%d. %m. %Y")
+      assert_select "td", text: /#{reading_date.strftime('%d. %m.')}/
       assert_select "td", text: /25\.50/
       assert_select "td", text: /8\.75/
       assert_select "td", text: /16\.75/
@@ -159,7 +158,7 @@ class DashboardControllerTest < ActionDispatch::IntegrationTest
     VirtualBatteryReading.create!(date: monday, exported_to_grid: 5.0, imported_from_grid: 2.0)
 
     get dashboard_readings_url(tab: "daily", page: ((Date.current - monday).to_i / 7))
-    assert_select ".readings-table tbody td", text: "Pondelok"
+    assert_select ".readings-table tbody td", text: /Pondelok/
   end
 
   test "daily view shows no older link on first page with no older data" do
