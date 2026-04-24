@@ -1,95 +1,10 @@
 <div class="dashboard-container">
   <h1 class="dashboard-title">Prehľad virtuálnej batérie</h1>
   
-  <div class="year-summary">
-    <h2 class="section-title">Ročný súhrn (<%= Date.current.year %>)</h2>
-    
-    <div class="metrics-grid">
-      
-      <!-- Kumulatívne odoslané do siete v aktuálnom roku -->
-      <div class="metric-card metric-card--current-charge">
-        <div class="metric-label">Kumulatívne odoslané do siete (aktuálny rok)</div>
-        <div class="metric-value">
-          <%= number_with_precision(@summary[:total_exported_to_grid], precision: 2) %>
-        </div>
-        <div class="metric-unit">kWh</div>
-      </div>
+  <%= render "year_summary" %>
 
-      <!-- Kumulatívne prijaté zo siete v aktuálnom roku -->
-      <div class="metric-card metric-card--exported">
-        <div class="metric-label">Kumulatívne prijaté zo siete (aktuálny rok)</div>
-        <div class="metric-value">
-          <%= number_with_precision(@summary[:total_imported_from_grid], precision: 2) %>
-        </div>
-        <div class="metric-unit">kWh</div>
-      </div>
+  <%= render "burndown_chart" %>
 
-      <!-- Kumulatívne saldo siete v aktuálnom roku -->
-      <div class="metric-card metric-card--imported-grid">
-        <div class="metric-label">Kumulatívne saldo siete (aktuálny rok)</div>
-        <div class="metric-value">
-          <%= number_with_precision(@summary[:net_grid_flow], precision: 2) %>
-        </div>
-        <div class="metric-unit">kWh</div>
-      </div>
-
-    </div>
-  </div>
-
-  <% if @chart_data.any? %>
-    <div class="burndown-chart"
-         data-controller="burndown-chart"
-         data-burndown-chart-readings-value="<%= @chart_data.to_json %>"
-         data-burndown-chart-max-capacity-value="<%= VirtualBatteryReading::VIRTUAL_BATTERY_MAX_CAPACITY %>"
-         data-burndown-chart-previous-year-readings-value="<%= @previous_year_data.to_json %>">
-      <h2 class="section-title">Stav virtuálnej batérie (<%= Date.current.year %>)</h2>
-      <div class="chart-wrapper">
-        <canvas data-burndown-chart-target="canvas"></canvas>
-      </div>
-    </div>
-  <% end %>
-
-  <% if @latest_reading %>
-    <div class="latest-reading">
-      <h2 class="section-title">Posledný záznam (<%= @latest_reading.date.strftime('%d. %m. %Y') %>)</h2>
-      
-      <div class="metrics-grid">
-
-        <!-- Odoslané do siete -->
-        <div class="metric-card metric-card--exported-orange">
-          <div class="metric-label">Odoslané do siete</div>
-          <div class="metric-value">
-            <%= number_with_precision(@latest_reading.exported_to_grid, precision: 2) %>
-          </div>
-          <div class="metric-unit">kWh</div>
-        </div>
-
-        <!-- Prijaté zo siete -->
-        <div class="metric-card metric-card--imported-purple">
-          <div class="metric-label">Prijaté zo siete</div>
-          <div class="metric-value">
-            <%= number_with_precision(@latest_reading.imported_from_grid, precision: 2) %>
-          </div>
-          <div class="metric-unit">kWh</div>
-        </div>
-
-        <!-- Rozdiel (export - import) -->
-        <div class="metric-card metric-card--imported-grid">
-          <div class="metric-label">Rozdiel (odoslané - prijaté)</div>
-          <div class="metric-value">
-            <%= number_with_precision(@latest_reading.exported_to_grid - @latest_reading.imported_from_grid, precision: 2) %>
-          </div>
-          <div class="metric-unit">kWh</div>
-        </div>
-
-      </div>
-    </div>
-  <% else %>
-    <div class="no-data">
-      <p>
-        <strong>Zatiaľ nie sú k dispozícii žiadne údaje.</strong> Údaje budú zhromažďované na pozadí.
-      </p>
-    </div>
-  <% end %>
+  <%= render "readings" %>
 
 </div>

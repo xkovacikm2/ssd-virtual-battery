@@ -1,0 +1,12 @@
+<% if @chart_data.any? %>
+  <div class="burndown-chart"
+       data-controller="burndown-chart"
+       data-burndown-chart-readings-value="<%= @chart_data.to_json %>"
+       data-burndown-chart-max-capacity-value="<%= VirtualBatteryReading::VIRTUAL_BATTERY_MAX_CAPACITY %>"
+       data-burndown-chart-previous-year-readings-value="<%= @previous_year_data.to_json %>">
+    <h2 class="section-title">Stav virtuálnej batérie (<%= Date.current.year %>)</h2>
+    <div class="chart-wrapper">
+      <canvas data-burndown-chart-target="canvas"></canvas>
+    </div>
+  </div>
+<% end %>

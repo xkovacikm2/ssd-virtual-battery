@@ -1,0 +1,15 @@
+<% if @has_readings %>
+  <div class="readings-section">
+    <h2 class="section-title">Záznamy (<%= Date.current.year %>)</h2>
+    <%= turbo_frame_tag "readings" do %>
+      <%= render "readings_tabs" %>
+      <%= render "readings_#{@tab}" %>
+    <% end %>
+  </div>
+<% else %>
+  <div class="no-data">
+    <p>
+      <strong>Zatiaľ nie sú k dispozícii žiadne údaje.</strong> Údaje budú zhromažďované na pozadí.
+    </p>
+  </div>
+<% end %>

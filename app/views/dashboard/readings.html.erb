@@ -1,0 +1,4 @@
+<%= turbo_frame_tag "readings" do %>
+  <%= render "readings_tabs" %>
+  <%= render "readings_#{@tab}" %>
+<% end %>

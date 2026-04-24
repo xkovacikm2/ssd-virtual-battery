@@ -1,0 +1,20 @@
+<table class="readings-table">
+  <thead>
+    <tr>
+      <th>Týždeň</th>
+      <th class="text-right">Odoslané (kWh)</th>
+      <th class="text-right">Prijaté (kWh)</th>
+      <th class="text-right">Rozdiel (kWh)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @weekly_readings.each do |r| %>
+      <tr>
+        <td><%= r[:start_date].strftime('%d. %m.') %> – <%= r[:end_date].strftime('%d. %m.') %></td>
+        <td class="text-right"><%= number_with_precision(r[:exported], precision: 2) %></td>
+        <td class="text-right"><%= number_with_precision(r[:imported], precision: 2) %></td>
+        <td class="text-right"><%= number_with_precision(r[:exported] - r[:imported], precision: 2) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
