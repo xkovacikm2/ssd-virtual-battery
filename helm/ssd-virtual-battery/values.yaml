@@ -82,3 +82,11 @@ worker:
     requests:
       cpu: 100m
       memory: 128Mi
+
+# WebEndpoint CRD configuration
+webEndpoint:
+  enabled: true
+  name: "SSD Virtual Battery"
+  description: "My Virtual Battery charge"
+  url: "https://ssd-virtual-battery.example.com"
+  icon: "https://ssd-virtual-battery.example.com/icon.png"
