@@ -1,0 +1,19 @@
+{
+  "name": "SSD Virtuálna batéria",
+  "short_name": "SSDBattery",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "description": "Datamine and visualise information about status of charge of your virtual battery from SSD provider",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
