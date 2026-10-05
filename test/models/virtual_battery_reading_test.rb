@@ -203,6 +203,66 @@ class VirtualBatteryReadingTest < ActiveSupport::TestCase
     assert data.none? { |row| row[:date].start_with?(Date.current.year.to_s) }
   end
 
+  # --- sync_missing_readings! ---
+
+  include SsdApiClientStubbing
+
+  PROFILE_ROWS = [ { incoming: "4.0", outgoing: "8.0" }, { incoming: "4.0", outgoing: "8.0" } ].freeze
+
+  test "sync_missing_readings! fetches every missing day up to yesterday" do
+    VirtualBatteryReading.destroy_all
+    VirtualBatteryReading.create!(date: Date.current - 4, exported_to_grid: 1, imported_from_grid: 1)
+    client = stub_ssd_api_client { PROFILE_ROWS }
+
+    assert_difference "VirtualBatteryReading.count", 3 do
+      assert_equal 3, VirtualBatteryReading.sync_missing_readings!
+    end
+    assert_equal [ Date.current - 3, Date.current - 2, Date.yesterday ], client.requested_dates
+    reading = VirtualBatteryReading.find_by!(date: Date.yesterday)
+    assert_equal 4.0, reading.exported_to_grid
+    assert_equal 2.0, reading.imported_from_grid
+  ensure
+    unstub_ssd_api_client
+  end
+
+  test "sync_missing_readings! does nothing when yesterday is already stored" do
+    VirtualBatteryReading.create!(date: Date.yesterday, exported_to_grid: 1, imported_from_grid: 1)
+    client = stub_ssd_api_client { PROFILE_ROWS }
+
+    assert_no_difference "VirtualBatteryReading.count" do
+      assert_equal 0, VirtualBatteryReading.sync_missing_readings!
+    end
+    assert_empty client.requested_dates
+  ensure
+    unstub_ssd_api_client
+  end
+
+  test "sync_missing_readings! stops without saving when SSD returns no rows" do
+    VirtualBatteryReading.destroy_all
+    VirtualBatteryReading.create!(date: Date.current - 3, exported_to_grid: 1, imported_from_grid: 1)
+    client = stub_ssd_api_client { |date| date == Date.yesterday ? [] : PROFILE_ROWS }
+
+    assert_difference "VirtualBatteryReading.count", 1 do
+      VirtualBatteryReading.sync_missing_readings!
+    end
+    assert_nil VirtualBatteryReading.find_by(date: Date.yesterday)
+    assert_equal [ Date.current - 2, Date.yesterday ], client.requested_dates
+  ensure
+    unstub_ssd_api_client
+  end
+
+  test "sync_missing_readings! starts at beginning of year when there are no readings" do
+    skip "nothing to sync on January 1st" if Date.current == Date.current.beginning_of_year
+    VirtualBatteryReading.destroy_all
+    client = stub_ssd_api_client { [] }
+
+    VirtualBatteryReading.sync_missing_readings!
+
+    assert_equal [ Date.current.beginning_of_year ], client.requested_dates
+  ensure
+    unstub_ssd_api_client
+  end
+
   private
 
   def destroy_previous_year_readings

@@ -1,6 +1,8 @@
 class DashboardController < ApplicationController
   ALLOWED_TABS = %w[daily weekly monthly].freeze
 
+  before_action :sync_readings, only: :index
+
   def index
     @summary = VirtualBatteryReading.year_to_date_summary
     @chart_data = VirtualBatteryReading.daily_chart_data
@@ -15,6 +17,12 @@ class DashboardController < ApplicationController
   end
 
   private
+
+  def sync_readings
+    VirtualBatteryReading.sync_missing_readings!
+  rescue StandardError => e
+    Rails.logger.error "Failed to sync virtual battery readings: #{e.class}: #{e.message}"
+  end
 
   def load_readings_data
     @tab = ALLOWED_TABS.include?(params[:tab]) ? params[:tab] : "daily"

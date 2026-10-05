@@ -9,7 +9,6 @@ To check the status of your pods:
 
 To view logs:
   kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=web
-  kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=worker
 
 To run the data collection manually:
   kubectl exec -it deploy/{{ include "ssd-virtual-battery.fullname" . }} -- bin/rails virtual_battery:collect_data

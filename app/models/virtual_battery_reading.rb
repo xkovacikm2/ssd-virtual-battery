@@ -1,5 +1,6 @@
 class VirtualBatteryReading < ApplicationRecord
   VIRTUAL_BATTERY_MAX_CAPACITY = 6000
+  SYNC_LOCK_KEY = 74_201_001
 
   validates :date, presence: true, uniqueness: true
   validates :exported_to_grid, :imported_from_grid,
@@ -71,4 +72,48 @@ class VirtualBatteryReading < ApplicationRecord
 
     { reading: reading }
   end
+
+  def self.up_to_date?
+    where(date: Date.yesterday..).exists?
+  end
+
+  # Fetches readings from SSD for every day since the last reading up to yesterday.
+  # Returns the number of readings saved.
+  def self.sync_missing_readings!
+    return 0 if up_to_date?
+
+    with_sync_lock do
+      last_date = maximum(:date)
+      start_date = last_date ? last_date + 1 : Date.current.beginning_of_year
+      saved = 0
+      next saved if start_date > Date.yesterday
+
+      ssd_client = SsdApiClient.new
+      (start_date..Date.yesterday).each do |date|
+        profile_data = ssd_client.fetch_profile_data_for_date(date)
+        # SSD has not published this day yet; retry on a later visit.
+        break if profile_data.blank?
+
+        reading = create_from_profile_data(date: date, profile_data: profile_data)[:reading]
+        Rails.logger.info "Saved reading for #{date}: exported_grid=#{reading.exported_to_grid}, " \
+                          "imported_grid=#{reading.imported_from_grid}"
+        saved += 1
+      end
+      saved
+    end
+  end
+
+  # Skips the block (returns 0) if another process is already syncing.
+  def self.with_sync_lock
+    # Advisory locks are server-wide, so scope the key to this database.
+    lock_args = "#{SYNC_LOCK_KEY}, hashtext(current_database())"
+    return 0 unless connection.select_value("SELECT pg_try_advisory_lock(#{lock_args})")
+
+    begin
+      yield
+    ensure
+      connection.select_value("SELECT pg_advisory_unlock(#{lock_args})")
+    end
+  end
+  private_class_method :with_sync_lock
 end
