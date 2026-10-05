@@ -1,6 +1,51 @@
 require "test_helper"
 
 class DashboardControllerTest < ActionDispatch::IntegrationTest
+  include SsdApiClientStubbing
+
+  setup { @ssd_client = stub_ssd_api_client }
+  teardown { unstub_ssd_api_client }
+
+  test "index syncs missing readings before rendering" do
+    VirtualBatteryReading.destroy_all
+    VirtualBatteryReading.create!(date: Date.current - 2, exported_to_grid: 1, imported_from_grid: 1)
+    @ssd_client = stub_ssd_api_client { [ { incoming: "4.0", outgoing: "8.0" } ] }
+
+    get root_url
+
+    assert_response :success
+    assert_equal [ Date.yesterday ], @ssd_client.requested_dates
+    assert VirtualBatteryReading.exists?(date: Date.yesterday)
+  end
+
+  test "index does not sync when yesterday is already stored" do
+    VirtualBatteryReading.create!(date: Date.yesterday, exported_to_grid: 1, imported_from_grid: 1)
+
+    get root_url
+
+    assert_response :success
+    assert_empty @ssd_client.requested_dates
+  end
+
+  test "index renders existing data when sync fails" do
+    VirtualBatteryReading.destroy_all
+    VirtualBatteryReading.create!(date: Date.current - 2, exported_to_grid: 20.0, imported_from_grid: 10.0)
+    stub_ssd_api_client { raise "SSD down" }
+
+    get root_url
+
+    assert_response :success
+    assert_select ".metric-value", text: /20\.00/
+  end
+
+  test "readings does not sync" do
+    VirtualBatteryReading.destroy_all
+
+    get dashboard_readings_url(tab: "daily")
+
+    assert_empty @ssd_client.requested_dates
+  end
+
   test "should get index" do
     get root_url
     assert_response :success

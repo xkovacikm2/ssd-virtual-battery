@@ -73,23 +73,14 @@ Datamine and visualise information about status of charge of your virtual batter
 
 5. Visit http://localhost:3000 to see the dashboard
 
-## Background Data Collection
+## Data Collection
 
-The application includes a background job for collecting virtual battery data. You can run it manually:
+There is no background worker. When the dashboard is opened and the latest stored reading is older than yesterday, the app fetches all missing days from SSD before rendering. The first visit of the day is therefore slightly slower. If SSD is unavailable, the error is logged and existing data is shown.
+
+You can also trigger the same sync manually:
 
 ```bash
 rails virtual_battery:collect_data
-```
-
-In a production environment, you would schedule this job to run periodically using:
-- **Cron**: Add a cron job to run the rake task daily
-- **Solid Queue**: Configure recurring jobs in Rails 8
-- **Sidekiq**: Use sidekiq-cron or similar scheduling gem
-- **Whenever gem**: For cron-like scheduling in Ruby
-
-Example cron entry:
-```
-0 0 * * * cd /path/to/app && rails virtual_battery:collect_data
 ```
 
 ## Database Schema
@@ -141,7 +132,6 @@ bin/bundler-audit
 - **Ruby**: 3.3
 - **Rails**: 8.1.2
 - **Database**: PostgreSQL 16
-- **Background Jobs**: Active Job with Solid Queue
 - **Development**: DevContainer with Docker Compose
 
 ## Future Enhancements

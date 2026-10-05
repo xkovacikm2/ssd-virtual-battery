@@ -9,7 +9,7 @@ SSD Virtual Battery Dashboard is a Ruby on Rails 8 application that collects and
 - **Language**: Ruby 3.3
 - **Framework**: Rails 8.1.2
 - **Database**: PostgreSQL 16
-- **Background Jobs**: Active Job with Solid Queue
+- **Data Sync**: on-demand in `DashboardController#index` (no background worker)
 - **Asset Pipeline**: Propshaft with importmap-rails
 - **Frontend**: Hotwire (Turbo + Stimulus)
 - **Development Environment**: DevContainer with Docker Compose
@@ -60,7 +60,7 @@ bin/bundler-audit
 
 - Follow the [Omakase Ruby styling for Rails](https://github.com/rails/rubocop-rails-omakase) enforced by RuboCop. Run `bin/rubocop -a` to auto-correct offenses before committing.
 - Use Rails conventions: fat models, thin controllers, RESTful routes.
-- All business logic for data collection lives under `app/jobs/` and `lib/tasks/virtual_battery.rake`.
+- Data collection logic lives in `VirtualBatteryReading.sync_missing_readings!` (used by the dashboard and `lib/tasks/virtual_battery.rake`).
 - Decimal columns (e.g. energy values in kWh) should use `decimal` type with appropriate precision/scale in migrations.
 - Every database migration must be reversible where possible.
 
