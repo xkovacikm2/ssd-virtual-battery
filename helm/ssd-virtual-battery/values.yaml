@@ -1,4 +1,4 @@
-# Rails application configuration
+# Web application configuration (key kept as `rails` for compatibility with existing values files)
 rails:
   replicaCount: 1
   image:
@@ -11,14 +11,8 @@ rails:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
-
-  # Rails environment
-  railsEnv: production
-  
-  # Secret key base for Rails (generate with: rails secret)
-  secretKeyBase: ""
+      cpu: 100m
+      memory: 128Mi
 
 # SSD API configuration
 ssdApi:
@@ -50,14 +44,15 @@ postgresql:
       cpu: 500m
       memory: 512Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 100m
+      memory: 128Mi
 
 # Ingress configuration (Traefik IngressRoute CRD)
 ingress:
   enabled: true
+  httpOnly: false
   hostname: ssd-virtual-battery.example.com
-  # TLS configuration with cert-manager
+  # TLS configuration with cert-manager (ignored when httpOnly is true)
   tls:
     enabled: false
     issuer: letsencrypt-prod  # ClusterIssuer name

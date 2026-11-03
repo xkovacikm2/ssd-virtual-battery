@@ -11,4 +11,4 @@ To view logs:
   kubectl logs -l app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=web
 
 To run the data collection manually:
-  kubectl exec -it deploy/{{ include "ssd-virtual-battery.fullname" . }} -- bin/rails virtual_battery:collect_data
+  kubectl exec -it deploy/{{ include "ssd-virtual-battery.fullname" . }} -- /ssdvb sync
