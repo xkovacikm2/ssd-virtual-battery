@@ -2,29 +2,34 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "rails server",
+      "label": "build frontend",
       "type": "shell",
-      "command": "rails s",
+      "command": "npm --prefix web run build",
+      "problemMatcher": []
+    },
+    {
+      "label": "go serve",
+      "type": "shell",
+      "command": "npm --prefix web run build && go run ./cmd/ssdvb serve",
       "isBackground": true,
       "problemMatcher": {
-        "owner": "rails",
-        "pattern": {
-          "regexp": "^$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "Booting",
-          "endsPattern": "Listening on"
-        }
+        "owner": "go",
+        "pattern": { "regexp": "^$" },
+        "background": { "activeOnStart": true, "beginsPattern": "vite", "endsPattern": "listening" }
       },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "vite dev",
+      "type": "shell",
+      "command": "npm --prefix web run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^$" },
+        "background": { "activeOnStart": true, "beginsPattern": "VITE", "endsPattern": "Local:" }
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
+      "presentation": { "reveal": "always", "panel": "dedicated" }
     }
   ]
 }

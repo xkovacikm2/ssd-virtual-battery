@@ -4,7 +4,7 @@
 /.git/
 /.gitignore
 
-# Ignore bundler config.
+# Keep local dependency caches out of the build context.
 /.bundle
 
 # Ignore all environment files.
@@ -32,6 +32,9 @@
 
 # Ignore assets.
 /node_modules/
+/web/node_modules/
+/web/dist/
+/e2e/
 /app/assets/builds/*
 !/app/assets/builds/.keep
 /public/assets
@@ -39,7 +42,7 @@
 # Ignore CI service files.
 /.github
 
-# Ignore Kamal files.
+# Keep legacy deployment secrets out of the build context.
 /config/deploy*.yml
 /.kamal
 

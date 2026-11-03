@@ -9,35 +9,35 @@ permissions:
   contents: read
 
 jobs:
-  scan_ruby:
+  scan_go:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Go
+        uses: actions/setup-go@v6
         with:
-          bundler-cache: true
+          go-version-file: go.mod
 
-      - name: Scan for common Rails security vulnerabilities using static analysis
-        run: bin/brakeman --no-pager
+      - name: Scan Go dependencies for known vulnerabilities
+        env:
+          GOFLAGS: -mod=mod
+        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./internal/...
 
-      - name: Scan for known security vulnerabilities in gems used
-        run: bin/bundler-audit
-
-  scan_js:
+  scan_web:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Node
+        uses: actions/setup-node@v6
         with:
-          bundler-cache: true
+          node-version: lts/*
 
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
+      - name: Audit frontend dependencies
+        run: npm audit --omit=dev
+        working-directory: web

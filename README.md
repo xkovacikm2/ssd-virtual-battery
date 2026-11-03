@@ -1,143 +1,66 @@
 # SSD Virtual Battery Dashboard
 
-[![Security Scan](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/scan.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/scan.yml)
-[![Lint](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/lint.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/lint.yml)
-[![Tests](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/test.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/test.yml)
-[![Docker](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/docker.yml/badge.svg)](https://github.com/xkovacikm2/ssd-virtual-battery/actions/workflows/docker.yml)
-
-Datamine and visualise information about status of charge of your virtual battery from SSD provider.
-
-## Features
-
-- **Dashboard**: View cumulative statistics for the current calendar year and the latest daily reading
-- **Metrics Tracked**:
-  - Total electricity exported to grid (year-to-date)
-  - Total electricity imported from grid (year-to-date)
-  - Net virtual battery balance (year-to-date)
-- **Grid Flow Logic**: Daily outgoing energy is stored as `exported_to_grid`; daily incoming energy is stored as `imported_from_grid`. Virtual battery balance is calculated as `min(total_exported, 6000) - total_imported` (virtual battery capacity: 6,000 kWh).
-- **Burndown Chart**: Visualises cumulative daily exports and imports for the current year alongside the previous year for comparison
-- **Background Service**: Automated data collection job that fetches 15-minute interval data from the SSD provider and aggregates it into daily readings
-- **PostgreSQL Database**: Stores daily readings with proper indexing
-
-## Prerequisites
-
-- Docker and Docker Compose
-- VS Code with Remote - Containers extension (for devcontainer)
-
-## Getting Started
-
-### Using DevContainer (Recommended)
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/xkovacikm2/ssd-virtual-battery.git
-   cd ssd-virtual-battery
-   ```
-
-2. Open in VS Code:
-   ```bash
-   code .
-   ```
-
-3. When prompted, click "Reopen in Container" or run the command "Remote-Containers: Reopen in Container"
-
-4. The container will build and install all dependencies automatically
-
-5. Once the container is ready, the database will be created and migrated
-   
-6. Copy .env.template as .env and provide values for variables. Name and password for your SSD provider at [ims.ssd.sk](https://ims.ssd.sk/login)
-   and id of your extraction point.
-
-### Manual Setup
-
-1. Install dependencies:
-   ```bash
-   bundle install
-   ```
-
-2. Set up the database:
-   ```bash
-   rails db:create
-   rails db:migrate
-   ```
-
-3. (Optional) Seed sample data for testing:
-   ```bash
-   rails virtual_battery:seed_sample_data
-   ```
-
-4. Start the server:
-   ```bash
-   rails server
-   ```
-
-5. Visit http://localhost:3000 to see the dashboard
-
-## Data Collection
-
-There is no background worker. When the dashboard is opened and the latest stored reading is older than yesterday, the app fetches all missing days from SSD before rendering. The first visit of the day is therefore slightly slower. If SSD is unavailable, the error is logged and existing data is shown.
-
-You can also trigger the same sync manually:
-
-```bash
-rails virtual_battery:collect_data
-```
-
-## Database Schema
-
-### VirtualBatteryReading Model
-
-**Stored columns** (one record per calendar date):
-
-| Column                    | Type         | Description                                           |
-|---------------------------|--------------|-------------------------------------------------------|
-| date                      | date         | Date of the reading (unique, required)                |
-| exported_to_grid          | decimal(10,2)| Daily electricity sent to the grid (kWh), default 0  |
-| imported_from_grid        | decimal(10,2)| Daily electricity taken from the grid (kWh), default 0|
-
-**Calculated values** (computed in memory, not stored):
-
-| Value                     | Description                                                                 |
-|---------------------------|-----------------------------------------------------------------------------|
-| Year-to-date export total | Sum of `exported_to_grid` for all readings in the current year              |
-| Year-to-date import total | Sum of `imported_from_grid` for all readings in the current year            |
-| Net balance               | `min(total_exported, 6000) - total_imported` (virtual battery capacity: 6,000 kWh) |
-| Daily difference          | `exported_to_grid − imported_from_grid` for the latest reading              |
-| Cumulative chart data     | Running totals of exports and imports by date for the current year          |
-| Previous year comparison  | Daily cumulative values from the previous year used as a projection baseline|
+A Go and Lit dashboard for daily electricity imports and exports from the SSD virtual battery service. PostgreSQL stores one reading per date. The dashboard displays year-to-date totals, a projection chart, and daily, weekly, and monthly readings.
 
 ## Development
 
-### Running Tests
+Open the repository in its VS Code devcontainer. It provides Go, Node.js, PostgreSQL 16, and Playwright. For a local setup, install Go (see `go.mod`), Node.js LTS, and PostgreSQL 16, then create development, test, and end-to-end databases.
+
+Set `DATABASE_URL` to the development PostgreSQL connection string. The devcontainer sets it automatically. Set `IMS_SSD_USERNAME`, `IMS_SSD_PASSWORD`, and `IMS_SSD_POINT_OF_DELIVERY_ID` for SSD access. For example, copy `.env.template` to `.env`, fill in the values, then explicitly load it in your shell:
 
 ```bash
-rails test
+set -a
+source .env
+set +a
 ```
 
-### Running Linter
+The Go application does not automatically load `.env`. Never commit credentials.
+
+Install and build the frontend before building or starting Go, because the binary embeds the built files:
 
 ```bash
-bin/rubocop
+npm --prefix web ci
+npm --prefix web run build
+go run ./cmd/ssdvb serve
 ```
 
-### Running Security Checks
+Open http://localhost:3000. For frontend development, run `npm --prefix web run dev` in a second terminal and open http://localhost:5173; Vite proxies API requests to the Go server on port 3000.
+
+## Data And Migrations
+
+Opening the dashboard synchronizes missing days through yesterday, in UTC. If SSD is unavailable, the dashboard still shows existing data. To synchronize manually:
 
 ```bash
-bin/brakeman
-bin/bundler-audit
+go run ./cmd/ssdvb sync
 ```
 
-## Technology Stack
+`serve` runs migrations on startup; `go run ./cmd/ssdvb migrate` runs them separately. Back up the database before upgrading from Rails: migration 00002 removes Rails metadata and any old Solid Queue tables and is **irreversible**. Restore the backup to roll back to Rails. The migration preserves `virtual_battery_readings` and fails rather than cascading into unrelated dependent objects.
 
-- **Ruby**: 3.3
-- **Rails**: 8.1.2
-- **Database**: PostgreSQL 16
-- **Development**: DevContainer with Docker Compose
+Daily incoming and outgoing measurements are stored as `imported_from_grid` and `exported_to_grid`, respectively. The year-to-date balance is `min(total exported, 6000) - total imported`, in kWh. The dashboard has no authentication; protect access at the deployment boundary if needed.
 
-## Future Enhancements
+## Tests
 
-- Historical data charts and graphs
-- Export data to CSV/PDF
-- Alert system for charge levels
-- Multi-user support with authentication
-- Mobile-responsive improvements
+Set `TEST_DATABASE_URL` and `E2E_DATABASE_URL` to separate disposable PostgreSQL databases. The Go tests create and drop isolated schemas; the browser suite deletes readings in its end-to-end database.
+
+```bash
+npm --prefix web run build
+go test ./...
+npm --prefix web test
+npm --prefix e2e ci
+cd e2e && npx playwright test
+```
+
+The browser suite uses a fake SSD server. For a first local run, install Chromium with `npx playwright install --with-deps chromium` from `e2e/`. Use test-driven development: write a failing test, implement the behavior, and rerun the focused test.
+
+## Configuration
+
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string, required |
+| `PORT` | HTTP port, defaults to 3000 |
+| `IMS_SSD_USERNAME` | SSD account username |
+| `IMS_SSD_PASSWORD` | SSD account password |
+| `IMS_SSD_POINT_OF_DELIVERY_ID` | SSD point of delivery ID |
+| `IMS_SSD_BASE_URL` | Optional SSD API URL override, primarily for testing |
+
+SSD credentials are only needed for synchronization; missing credentials do not prevent the dashboard from serving existing data.
